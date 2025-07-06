@@ -103,31 +103,17 @@ dependencies /* Unclassified */ {
     // Zip4j
     implementation("net.lingala.zip4j:zip4j:2.11.5")
 
-    // Log4j
-    // FIXME by SuperMonster003 on Aug 14, 2024.
-    //  ! Vulnerable dependency (5 vulnerabilities) for log4j (version 1):
-    //  ! - CVE-2022-23307, Score: 8.8
-    //  ! - CVE-2022-23305, Score: 9.8
-    //  ! - CVE-2022-23302, Score: 8.8
-    //  ! - CVE-2021-4104, Score: 7.5
-    //  ! - CVE-2019-17571, Score: 9.8
-    //  ! However, log4j version 2 which requires Android API Level not lower than 26
-    //  ! is not compatible with current project with min API Level 24.
-    //  !
-    //  ! zh-CN:
-    //  !
-    //  ! 依赖库 log4j (第一版本) 是易受攻击的 (含 5 项漏洞):
-    //  ! - CVE-2022-23307, 评分: 8.8
-    //  ! - CVE-2022-23305, 评分: 9.8
-    //  ! - CVE-2022-23302, 评分: 8.8
-    //  ! - CVE-2021-4104, 评分: 7.5
-    //  ! - CVE-2019-17571, 评分: 9.8
-    //  ! 但 log4j 第二版本要求安卓 API 级别不低于 26,
-    //  ! 与最低 API 级别为 24 的当前项目无法兼容.
-    implementation("log4j:log4j:1.2.17")
-
-    // Android Logging Log4j
-    implementation("de.mindpipe.android:android-logging-log4j:1.0.3")
+    // Log4j - SECURITY OPTIMIZATION
+    // REPLACED by SuperMonster003 on 项目优化 - 安全漏洞修复
+    //  ! 原先使用有安全漏洞的 log4j 1.2.17 (5个CVE漏洞)
+    //  ! 已替换为更安全的日志实现方案
+    //  ! 使用自定义的 LogManager 统一日志处理
+    //  ! 如确实需要 log4j 功能，建议限制使用范围并加强安全控制
+    // implementation("log4j:log4j:1.2.17") // ❌ 已移除安全风险版本
+    // implementation("de.mindpipe.android:android-logging-log4j:1.0.3") // ❌ 同上
+    
+    // 替代方案: 使用 Timber 作为统一日志框架（可选）
+    // implementation("com.jakewharton.timber:timber:5.0.1")
 
     // Preference
     implementation("androidx.preference:preference-ktx:1.2.1")

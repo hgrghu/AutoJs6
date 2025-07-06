@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_copy_original"
+        android:title="复制原始代码"
+        android:icon="@drawable/ic_content_copy_24"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_copy_modified"
+        android:title="复制修改后代码"
+        android:icon="@drawable/ic_content_copy_24"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_share"
+        android:title="分享修改记录"
+        android:icon="@drawable/ic_share_24"
+        app:showAsAction="ifRoom" />
+
+</menu>

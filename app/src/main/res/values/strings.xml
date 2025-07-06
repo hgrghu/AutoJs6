@@ -911,6 +911,14 @@
     <string name="text_add_models_to_get_started">Add AI models to get started with intelligent automation</string>
     <string name="text_add_default_models">Add Default Models</string>
     <string name="text_advanced_settings">Advanced Settings</string>
+    <string name="text_smart_script_editor">Smart Script Editor</string>
+    <string name="text_script_diff_view">Script Diff View</string>
+    <string name="text_script_monitoring">Script Monitoring</string>
+    <string name="text_auto_fix">Auto Fix</string>
+    <string name="text_reference_info">Reference Info</string>
+    <string name="text_modification_history">Modification History</string>
+    <string name="text_execute_with_agent">Execute with Agent</string>
+    <string name="text_stop_monitoring">Stop Monitoring</string>
     <string name="text_file_with_abs_path_is_not_an_executable_script">File \"%1$s\" is not an executable script</string>
     <string name="text_filename_cannot_be_empty">Filename cannot be empty</string>
     <string name="text_filename_cannot_contain_invalid_character">Filename cannot contain the following characters: \\ / : * ? &quot; &lt; &gt; |</string>

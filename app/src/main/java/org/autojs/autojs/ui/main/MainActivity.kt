@@ -385,6 +385,10 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
             AgentControlActivity.launch(this)
             return true
         }
+        if (item.itemId == R.id.action_smart_editor) {
+            startActivity(Intent(this, org.autojs.autojs.ui.agent.ScriptEditorAgentActivity::class.java))
+            return true
+        }
         if (item.itemId == R.id.action_search_next) {
             submitForwardQuery()
             return true

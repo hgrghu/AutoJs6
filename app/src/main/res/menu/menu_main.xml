@@ -16,6 +16,12 @@
         app:showAsAction="ifRoom" />
 
     <item
+        android:id="@+id/action_smart_editor"
+        android:icon="@drawable/ic_code_24"
+        android:title="@string/text_smart_script_editor"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/action_search"
         android:icon="@drawable/ic_search_black_48dp"
         android:title="@string/text_search"

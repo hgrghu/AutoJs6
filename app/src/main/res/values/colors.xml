@@ -181,4 +181,25 @@
     <color name="floating_console_content_bg">#99262626</color>
     <color name="floating_console_title_bar_bg">#cc181818</color>
 
+    <!-- Agent UI Colors -->
+    <color name="agent_primary">#2196F3</color>
+    <color name="agent_primary_variant">#1976D2</color>
+    <color name="agent_secondary">#03DAC6</color>
+    <color name="agent_background">#F5F5F5</color>
+    <color name="agent_surface">#FFFFFF</color>
+    <color name="agent_error">#B00020</color>
+    <color name="agent_on_primary">#FFFFFF</color>
+    <color name="agent_on_secondary">#000000</color>
+    <color name="agent_on_background">#000000</color>
+    <color name="agent_on_surface">#000000</color>
+    <color name="agent_on_error">#FFFFFF</color>
+    
+    <!-- Code Editor Colors -->
+    <color name="code_editor_background">#F8F9FA</color>
+    <color name="code_editor_background_dark">#1E1E1E</color>
+    <color name="code_added">#D4F4DD</color>
+    <color name="code_removed">#FFEEF0</color>
+    <color name="code_added_dark">#004225</color>
+    <color name="code_removed_dark">#5D0F12</color>
+
 </resources>

@@ -358,6 +358,18 @@
             android:theme="@style/AppTheme.FullScreen" />
 
         <activity
+            android:name="org.autojs.autojs.ui.agent.ScriptEditorAgentActivity"
+            android:exported="false"
+            android:label="@string/text_smart_script_editor"
+            android:theme="@style/AppTheme.FullScreen" />
+
+        <activity
+            android:name="org.autojs.autojs.ui.agent.ScriptDiffViewActivity"
+            android:exported="false"
+            android:label="@string/text_script_diff_view"
+            android:theme="@style/AppTheme.FullScreen" />
+
+        <activity
             android:name="org.autojs.autojs.external.widget.ScriptWidgetSettingsActivity"
             android:exported="false">
 

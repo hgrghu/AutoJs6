@@ -338,6 +338,19 @@
             android:name="org.autojs.autojs.ui.shortcut.ShortcutCreateActivity"
             android:theme="@style/AppTheme.Transparent" />
 
+        <!-- AI Agent System Activities -->
+        <activity
+            android:name="org.autojs.autojs.ui.agent.AgentControlActivity"
+            android:exported="true"
+            android:label="@string/text_ai_agent"
+            android:theme="@style/AppTheme.FullScreen" />
+
+        <activity
+            android:name="org.autojs.autojs.ui.agent.UIAnalyzerActivity"
+            android:exported="false"
+            android:label="@string/text_ui_analyzer"
+            android:theme="@style/AppTheme.FullScreen" />
+
         <activity
             android:name="org.autojs.autojs.external.widget.ScriptWidgetSettingsActivity"
             android:exported="false">

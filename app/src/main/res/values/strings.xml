@@ -843,6 +843,33 @@
     <string name="text_file_name">File name</string>
     <string name="text_file_not_exists">File does not exist</string>
     <string name="text_file_path">File Path</string>
+    
+    <!-- AI Agent System Strings -->
+    <string name="text_ai_agent">AI Agent</string>
+    <string name="text_ui_analyzer">UI Analyzer</string>
+    <string name="text_natural_language_task">Natural Language Task</string>
+    <string name="text_agent_control">Agent Control</string>
+    <string name="text_analyze_ui">Analyze UI</string>
+    <string name="text_learning_mode">Learning Mode</string>
+    <string name="text_execution_history">Execution History</string>
+    <string name="text_auto_execute">Auto Execute</string>
+    <string name="text_describe_task">Describe your task...</string>
+    <string name="text_agent_status">Agent Status</string>
+    <string name="text_script_generated">Script Generated</string>
+    <string name="text_task_executed_successfully">Task executed successfully</string>
+    <string name="text_task_execution_failed">Task execution failed</string>
+    <string name="text_voice_input">Voice Input</string>
+    <string name="text_ai_models_loading">AI models loading...</string>
+    <string name="text_local_models">Local Models</string>
+    <string name="text_cloud_services">Cloud Services</string>
+    <string name="text_memory_usage">Memory Usage</string>
+    <string name="text_active_sessions">Active Sessions</string>
+    <string name="text_ui_elements_found">UI elements found</string>
+    <string name="text_suggested_actions">Suggested Actions</string>
+    <string name="text_generated_code">Generated Code</string>
+    <string name="text_confidence">Confidence</string>
+    <string name="text_optimization_suggestions">Optimization Suggestions</string>
+    <string name="text_performance_improvement">Performance Improvement</string>
     <string name="text_file_with_abs_path_is_not_an_executable_script">File \"%1$s\" is not an executable script</string>
     <string name="text_filename_cannot_be_empty">Filename cannot be empty</string>
     <string name="text_filename_cannot_contain_invalid_character">Filename cannot contain the following characters: \\ / : * ? &quot; &lt; &gt; |</string>

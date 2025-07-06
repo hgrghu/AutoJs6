@@ -58,6 +58,7 @@ import org.autojs.autojs.ui.main.drawer.DrawerFragment.Companion.Event.OnDrawerO
 import org.autojs.autojs.ui.main.scripts.ExplorerFragment
 import org.autojs.autojs.ui.main.task.TaskManagerFragment
 import org.autojs.autojs.ui.settings.PreferencesActivity
+import org.autojs.autojs.ui.agent.AgentControlActivity
 import org.autojs.autojs.ui.widget.DrawerAutoClose
 import org.autojs.autojs.ui.widget.SearchViewItem
 import org.autojs.autojs.util.StringUtils.key
@@ -378,6 +379,10 @@ class MainActivity : BaseActivity(), DelegateHost, HostActivity {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.action_log) {
             LogActivity.launch(this)
+            return true
+        }
+        if (item.itemId == R.id.action_ai_agent) {
+            AgentControlActivity.launch(this)
             return true
         }
         if (item.itemId == R.id.action_search_next) {

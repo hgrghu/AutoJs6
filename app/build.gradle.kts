@@ -350,6 +350,26 @@ dependencies /* MLKit */ {
     implementation("com.google.mlkit:barcode-scanning:17.3.0")
 }
 
+dependencies /* AI Agent System */ {
+    // TensorFlow Lite for local AI models
+    implementation("org.tensorflow:tensorflow-lite:2.14.0")
+    implementation("org.tensorflow:tensorflow-lite-gpu:2.14.0")
+    implementation("org.tensorflow:tensorflow-lite-support:0.4.4")
+    
+    // Kotlin Coroutines for async processing
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    
+    // JSON parsing for API responses
+    // Already included: Gson
+    
+    // HTTP client for cloud AI services
+    // Already included: OkHttp
+    
+    // Additional Android Architecture Components
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.7.0")
+}
+
 dependencies /* OpenCC */ {
     // OpenCC
     implementation("com.github.qichuan:android-opencc:1.2.0")

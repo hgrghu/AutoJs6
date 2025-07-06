@@ -14,6 +14,8 @@ import org.autojs.autojs.core.agent.learning.LearningModuleImpl
 import org.autojs.autojs.core.agent.models.LocalAIModels
 import org.autojs.autojs.core.agent.cloud.CloudAIService
 import java.util.UUID
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 
 /**
  * AutoJs6 智能Agent核心实现
@@ -52,6 +54,14 @@ class AutoJs6Agent private constructor(private val context: Context) {
     private var isInitialized = false
     private val agentScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     
+    // 状态管理
+    private val _agentStatus = MutableLiveData<AgentStatus>()
+    val agentStatus: LiveData<AgentStatus> = _agentStatus
+    
+    // 执行历史
+    private val executionHistory = mutableListOf<ExecutionRecord>()
+    private val activeSessions = mutableMapOf<String, LearningSession>()
+    
     /**
      * 初始化Agent系统
      */
@@ -81,9 +91,13 @@ class AutoJs6Agent private constructor(private val context: Context) {
             isInitialized = true
             LogManager.i(TAG, "AutoJs6 Agent初始化完成")
             
+            updateAgentStatus()
+            
             true
         } catch (e: Exception) {
             LogManager.e(TAG, "Agent初始化失败", e)
+            isInitialized = false
+            updateAgentStatus()
             false
         }
     }
@@ -134,6 +148,22 @@ class AutoJs6Agent private constructor(private val context: Context) {
             
             // 6. 学习记录
             learningModule.recordExecution(task, script, executionResult)
+            
+            // 7. 记录执行历史
+            val executionRecord = ExecutionRecord(
+                id = generateExecutionId(),
+                task = task,
+                script = script,
+                result = executionResult ?: OptimizedScriptExecutor.ScriptResult.success("Script generated but not executed"),
+                executionTime = System.currentTimeMillis(),
+                timestamp = System.currentTimeMillis()
+            )
+            executionHistory.add(executionRecord)
+            
+            // 8. 学习模式记录
+            if (options.enableLearning) {
+                recordExecution(sessionId, executionRecord)
+            }
             
             AgentResult.Success(
                 sessionId = sessionId,
@@ -205,7 +235,7 @@ class AutoJs6Agent private constructor(private val context: Context) {
      * 获取脚本执行历史
      */
     suspend fun getExecutionHistory(limit: Int = 50): List<ExecutionRecord> {
-        return learningModule.getExecutionHistory(limit)
+        return executionHistory.takeLast(limit).reversed()
     }
     
     /**
@@ -356,6 +386,21 @@ class AutoJs6Agent private constructor(private val context: Context) {
             (originalLines - optimizedLines).toFloat() / originalLines * 100f
         } else 0f
     }
+    
+    private fun updateAgentStatus() {
+        agentScope.launch {
+            _agentStatus.postValue(getAgentStatus())
+        }
+    }
+    
+    private fun recordExecution(sessionId: String, record: ExecutionRecord) {
+        activeSessions[sessionId]?.let { session ->
+            // 这里可以添加学习逻辑，分析用户行为模式
+            learningModule.recordExecution(record)
+        }
+    }
+    
+    private fun generateExecutionId(): String = "exec_${System.currentTimeMillis()}_${(1000..9999).random()}"
 }
 
 /**

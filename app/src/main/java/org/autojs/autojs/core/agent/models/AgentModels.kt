@@ -470,3 +470,93 @@ enum class EntityType {
     DURATION,
     CUSTOM
 }
+
+// =============== AI模型配置 ===============
+
+/**
+ * 模型提供商
+ */
+enum class ModelProvider(val displayName: String, val defaultBaseUrl: String) {
+    OPENAI("OpenAI GPT", "https://api.openai.com"),
+    ANTHROPIC("Anthropic Claude", "https://api.anthropic.com"),
+    GOOGLE("Google Gemini", "https://generativelanguage.googleapis.com"),
+    CUSTOM("Custom Model", "")
+}
+
+/**
+ * AI模型配置
+ */
+data class AIModelConfig(
+    val id: String = java.util.UUID.randomUUID().toString(),
+    val name: String,
+    val provider: ModelProvider,
+    val modelName: String,
+    val baseUrl: String,
+    val apiKey: String,
+    val maxTokens: Int = 1000,
+    val temperature: Float = 0.7f,
+    val requestTimeout: Int = 60,
+    val isEnabled: Boolean = true,
+    val isDefault: Boolean = false,
+    val createdAt: Long = System.currentTimeMillis(),
+    val updatedAt: Long = System.currentTimeMillis()
+) {
+    fun toDisplayString(): String = "${provider.displayName} - $name"
+    
+    fun isValid(): Boolean {
+        return name.isNotBlank() && 
+               modelName.isNotBlank() && 
+               baseUrl.isNotBlank() && 
+               apiKey.isNotBlank()
+    }
+    
+    companion object {
+        fun createDefaultOpenAI(): AIModelConfig {
+            return AIModelConfig(
+                name = "GPT-4",
+                provider = ModelProvider.OPENAI,
+                modelName = "gpt-4",
+                baseUrl = ModelProvider.OPENAI.defaultBaseUrl,
+                apiKey = "",
+                maxTokens = 2000,
+                temperature = 0.7f
+            )
+        }
+        
+        fun createDefaultClaude(): AIModelConfig {
+            return AIModelConfig(
+                name = "Claude-3.5-Sonnet",
+                provider = ModelProvider.ANTHROPIC,
+                modelName = "claude-3-5-sonnet-20241022",
+                baseUrl = ModelProvider.ANTHROPIC.defaultBaseUrl,
+                apiKey = "",
+                maxTokens = 1000,
+                temperature = 0.7f
+            )
+        }
+        
+        fun createDefaultGemini(): AIModelConfig {
+            return AIModelConfig(
+                name = "Gemini-Pro",
+                provider = ModelProvider.GOOGLE,
+                modelName = "gemini-pro",
+                baseUrl = ModelProvider.GOOGLE.defaultBaseUrl,
+                apiKey = "",
+                maxTokens = 1000,
+                temperature = 0.7f
+            )
+        }
+    }
+}
+
+/**
+ * Agent执行选项
+ */
+data class AgentExecutionOptions(
+    val autoExecute: Boolean = false,
+    val requireUIAnalysis: Boolean = true,
+    val modelConfig: AIModelConfig? = null,
+    val maxRetries: Int = 3,
+    val timeout: Long = 60000L,
+    val enableLearning: Boolean = false
+)

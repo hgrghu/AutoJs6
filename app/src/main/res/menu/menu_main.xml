@@ -11,7 +11,7 @@
 
     <item
         android:id="@+id/action_ai_agent"
-        android:icon="@drawable/ic_smart_toy"
+        android:icon="@drawable/ic_smart_toy_24"
         android:title="@string/text_ai_agent"
         app:showAsAction="ifRoom" />
 

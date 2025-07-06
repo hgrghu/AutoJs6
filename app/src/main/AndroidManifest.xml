@@ -352,6 +352,12 @@
             android:theme="@style/AppTheme.FullScreen" />
 
         <activity
+            android:name="org.autojs.autojs.ui.agent.ModelConfigActivity"
+            android:exported="false"
+            android:label="@string/text_model_management"
+            android:theme="@style/AppTheme.FullScreen" />
+
+        <activity
             android:name="org.autojs.autojs.external.widget.ScriptWidgetSettingsActivity"
             android:exported="false">
 

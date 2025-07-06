@@ -106,6 +106,17 @@ class AgentControlActivity : BaseActivity() {
                 stopLearningMode()
             }
         }
+
+        // 设置按钮
+        binding.settingsButton.setOnClickListener {
+            // TODO: 启动Agent设置页面
+            android.widget.Toast.makeText(this, "Agent设置功能待实现", android.widget.Toast.LENGTH_SHORT).show()
+        }
+
+        // 模型配置按钮
+        binding.modelConfigButton.setOnClickListener {
+            ModelConfigActivity.launch(this)
+        }
     }
 
     private fun initializeAgent() {

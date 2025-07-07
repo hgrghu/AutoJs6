@@ -24,6 +24,9 @@ import org.autojs.autojs.util.IntentUtils;
 import org.autojs.autojs.util.IntentUtils.ToastExceptionHolder;
 import org.autojs.autojs.util.ViewUtils;
 import org.autojs.autojs6.R;
+import org.autojs.autojs.agent.core.AgentService;
+import org.autojs.autojs.agent.ui.ChatInterface;
+import kotlinx.coroutines.*;
 
 import java.io.File;
 import java.util.Arrays;
@@ -42,11 +45,22 @@ public class EditorMenu {
     private final EditorView mEditorView;
     private final Context mContext;
     private final CodeEditor mEditor;
+    private AgentService mAgentService;
+    private ChatInterface mChatInterface;
 
     public EditorMenu(EditorView editorView) {
         mEditorView = editorView;
         mContext = editorView.getContext();
         mEditor = editorView.editor;
+        initializeAgentService();
+    }
+
+    private void initializeAgentService() {
+        try {
+            mAgentService = AgentService.getInstance(mContext);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -57,10 +71,217 @@ public class EditorMenu {
         if (itemId == R.id.action_force_stop) {
             return tryDoing(mEditorView::forceStop);
         }
-        return onEditOptionsSelected(item)
+        return onAgentOptionsSelected(item)
+               || onEditOptionsSelected(item)
                || onJumpOptionsSelected(item)
                || onMoreOptionsSelected(item)
                || onDebugOptionsSelected(item);
+    }
+
+    private boolean onAgentOptionsSelected(MenuItem item) {
+        int itemId = item.getItemId();
+        
+        if (itemId == R.id.action_toggle_agent_panel) {
+            mEditorView.toggleAgentPanel();
+            return true;
+        }
+        
+        if (itemId == R.id.action_ai_chat) {
+            showAIChat();
+            return true;
+        }
+        
+        if (itemId == R.id.action_optimize_script) {
+            optimizeScriptWithAI();
+            return true;
+        }
+        
+        if (itemId == R.id.action_generate_script) {
+            generateScriptWithAI();
+            return true;
+        }
+        
+        if (itemId == R.id.action_script_templates) {
+            showScriptTemplates();
+            return true;
+        }
+        
+        if (itemId == R.id.action_agent_settings) {
+            showAgentSettings();
+            return true;
+        }
+        
+        return false;
+    }
+
+    private void showAIChat() {
+        if (mChatInterface == null) {
+            mChatInterface = new ChatInterface(mContext);
+        }
+        mChatInterface.show();
+    }
+
+    private void optimizeScriptWithAI() {
+        String currentScript = mEditor.getText();
+        if (TextUtils.isEmpty(currentScript)) {
+            ViewUtils.showToast(mContext, "没有可优化的脚本内容");
+            return;
+        }
+
+        MaterialDialog progressDialog = new MaterialDialog.Builder(mContext)
+                .title("AI优化脚本")
+                .content("正在分析和优化脚本，请稍候...")
+                .progress(true, 0)
+                .cancelable(false)
+                .show();
+
+        Job optimizationJob = CoroutineKt.runBlocking(GlobalScope.INSTANCE, (scope, continuation) -> {
+            try {
+                if (mAgentService == null) {
+                    throw new Exception("Agent服务未初始化");
+                }
+                
+                var result = mAgentService.analyzeAndOptimizeScript(currentScript);
+                
+                ((android.app.Activity) mContext).runOnUiThread(() -> {
+                    progressDialog.dismiss();
+                    
+                    if (result.isSuccessful()) {
+                        showOptimizationResult(result);
+                    } else {
+                        ViewUtils.showToast(mContext, 
+                            "脚本优化失败: " + (result.getWarnings().isEmpty() ? "未知错误" : result.getWarnings().get(0)));
+                    }
+                });
+                
+            } catch (Exception e) {
+                ((android.app.Activity) mContext).runOnUiThread(() -> {
+                    progressDialog.dismiss();
+                    ViewUtils.showToast(mContext, "优化失败: " + e.getMessage());
+                });
+            }
+            return null;
+        });
+    }
+
+    private void showOptimizationResult(org.autojs.autojs.agent.model.OptimizationResult result) {
+        String improvements = result.getImprovements().isEmpty() ? 
+            "未发现明显需要改进的地方" : 
+            String.join("\n", result.getImprovements().stream()
+                .map(imp -> "• " + imp.getDescription())
+                .toArray(String[]::new));
+
+        new MaterialDialog.Builder(mContext)
+            .title("脚本优化结果 (评分: " + (int)result.getScore() + "/100)")
+            .content("改进建议:\n" + improvements)
+            .positiveText("应用优化")
+            .negativeText("取消")
+            .neutralText("查看对比")
+            .onPositive((dialog, which) -> {
+                mEditor.setText(result.getOptimizedScript());
+                ViewUtils.showSnack(mEditorView, "脚本已优化");
+            })
+            .onNeutral((dialog, which) -> {
+                showScriptComparison(result.getOriginalScript(), result.getOptimizedScript());
+            })
+            .show();
+    }
+
+    private void showScriptComparison(String original, String optimized) {
+        new MaterialDialog.Builder(mContext)
+            .title("脚本对比")
+            .content("原始脚本:\n" + original + "\n\n优化后脚本:\n" + optimized)
+            .positiveText("应用优化")
+            .negativeText("保持原样")
+            .onPositive((dialog, which) -> {
+                mEditor.setText(optimized);
+                ViewUtils.showSnack(mEditorView, "脚本已优化");
+            })
+            .show();
+    }
+
+    private void generateScriptWithAI() {
+        new MaterialDialog.Builder(mContext)
+            .title("AI生成脚本")
+            .content("请描述您想要实现的功能:")
+            .input("例如: 自动点击屏幕上的确定按钮", "", (dialog, input) -> {
+                if (!TextUtils.isEmpty(input)) {
+                    performScriptGeneration(input.toString());
+                }
+            })
+            .positiveText("生成")
+            .negativeText("取消")
+            .show();
+    }
+
+    private void performScriptGeneration(String request) {
+        MaterialDialog progressDialog = new MaterialDialog.Builder(mContext)
+                .title("AI生成脚本")
+                .content("正在根据您的需求生成脚本，请稍候...")
+                .progress(true, 0)
+                .cancelable(false)
+                .show();
+
+        Job generationJob = CoroutineKt.runBlocking(GlobalScope.INSTANCE, (scope, continuation) -> {
+            try {
+                if (mAgentService == null) {
+                    throw new Exception("Agent服务未初始化");
+                }
+                
+                var result = mAgentService.generateScript(request);
+                
+                ((android.app.Activity) mContext).runOnUiThread(() -> {
+                    progressDialog.dismiss();
+                    
+                    if (result.isExecutable()) {
+                        showGeneratedScript(result);
+                    } else {
+                        ViewUtils.showToast(mContext, "脚本生成失败: " + result.getExplanation());
+                    }
+                });
+                
+            } catch (Exception e) {
+                ((android.app.Activity) mContext).runOnUiThread(() -> {
+                    progressDialog.dismiss();
+                    ViewUtils.showToast(mContext, "生成失败: " + e.getMessage());
+                });
+            }
+            return null;
+        });
+    }
+
+    private void showGeneratedScript(org.autojs.autojs.agent.model.ScriptGenerationResult result) {
+        new MaterialDialog.Builder(mContext)
+            .title("脚本生成完成 (置信度: " + (int)(result.getConfidence() * 100) + "%)")
+            .content("生成的脚本:\n\n" + result.getScript() + "\n\n说明: " + result.getExplanation())
+            .positiveText("插入到编辑器")
+            .negativeText("取消")
+            .neutralText("替换当前内容")
+            .onPositive((dialog, which) -> {
+                mEditor.insert(result.getScript());
+                ViewUtils.showSnack(mEditorView, "脚本已插入");
+            })
+            .onNeutral((dialog, which) -> {
+                mEditor.setText(result.getScript());
+                ViewUtils.showSnack(mEditorView, "脚本已替换");
+            })
+            .show();
+    }
+
+    private void showScriptTemplates() {
+        new MaterialDialog.Builder(mContext)
+            .title("脚本模板库")
+            .content("模板库功能开发中，敬请期待...")
+            .positiveText("确定")
+            .show();
+    }
+
+    private void showAgentSettings() {
+        new MaterialDialog.Builder(mContext)
+            .title("AI Agent 设置")
+            .content("Agent设置功能开发中，敬请期待...")
+            .positiveText("确定")
+            .show();
     }
 
     private boolean onDebugOptionsSelected(MenuItem item) {
@@ -82,6 +303,37 @@ public class EditorMenu {
         if (itemId == R.id.action_remove_all_breakpoints) {
             mEditor.removeAllBreakpoints();
             return true;
+        }
+        return false;
+    }
+
+    private boolean onEditOptionsSelected(MenuItem item) {
+        int itemId = item.getItemId();
+        if (itemId == R.id.action_find_or_replace) {
+            findOrReplace();
+            return true;
+        }
+        if (itemId == R.id.action_copy_all) {
+            copyAll();
+            return true;
+        }
+        if (itemId == R.id.action_copy_line) {
+            return copyLine();
+        }
+        if (itemId == R.id.action_delete_line) {
+            return deleteLine();
+        }
+        if (itemId == R.id.action_paste) {
+            return paste();
+        }
+        if (itemId == R.id.action_clear) {
+            return tryDoing(() -> mEditor.setText(""));
+        }
+        if (itemId == R.id.action_comment) {
+            return tryDoing(mEditor.commentHelper::handle);
+        }
+        if (itemId == R.id.action_beautify) {
+            return tryDoing(mEditorView::beautifyCode);
         }
         return false;
     }
@@ -184,17 +436,6 @@ public class EditorMenu {
                     dialog.dismiss();
                 })
                 .onNegative((ignored, which) -> {
-                    // @Overwrite by SuperMonster003 on Jul 28, 2024.
-                    //  ! Adaptive to any circumstances by parsing a line number
-                    //  ! with JavaScriptFileSource.parseExecutionMode.
-                    //  ! zh-CN:
-                    //  ! 使用 JavaScriptFileSource.parseExecutionMode 解析行号以适配任何情况.
-                    //  !
-                    //  # if (mEditor.getText().startsWith(JavaScriptSource.EXECUTION_MODE_UI_PREFIX)) {
-                    //  #     mEditor.insert(1, item.getImportText() + ";\n");
-                    //  # } else {
-                    //  #     mEditor.insert(0, item.getImportText() + ";\n");
-                    //  # }
                     var executionInfo = JavaScriptFileSource.parseExecutionMode(mEditor.getText());
                     mEditor.insert(executionInfo.getLineno(), item.getImportText() + ";\n");
                 })
@@ -232,14 +473,6 @@ public class EditorMenu {
                     }
                     return true;
                 })
-
-                // TODO by SuperMonster003 on Oct 17, 2022.
-
-                // .neutralText(R.string.dialog_button_details)
-                // .neutralColorRes(R.color.dialog_button_hint)
-                // .onNeutral((dialog, which) -> {
-                //     // Hint dialog.
-                // })
                 .negativeText(R.string.dialog_button_cancel)
                 .negativeColorRes(R.color.dialog_button_default)
                 .onNegative((dialog, which) -> dialog.dismiss())
@@ -250,9 +483,6 @@ public class EditorMenu {
 
         MaterialDialogExtensions.choiceWidgetThemeColor(builder);
 
-        // TODO by SuperMonster003 on Oct 17, 2022.
-        //  ! Implementation for "scale view".
-        //  ! zh-CN: 实现 "scale view".
         makeEditorPinchToZoomScaleViewUnderDev(builder, itemKeys.indexOf(key(R.string.key_editor_pinch_to_zoom_scale_view)));
     }
 
@@ -265,44 +495,7 @@ public class EditorMenu {
     }
 
     private void startSymbolsSettingsActivity() {
-        // TODO by SuperMonster003 on Oct 16, 2022.
-
-        // new SymbolsSettingsActivity.IntentBuilder(mContext)
-        //         .extra(mEditorView.getUri().getPath())
-        //         .start();
-
         ViewUtils.showToast(mContext, R.string.text_under_development_content);
-    }
-
-    private boolean onEditOptionsSelected(MenuItem item) {
-        int itemId = item.getItemId();
-        if (itemId == R.id.action_find_or_replace) {
-            findOrReplace();
-            return true;
-        }
-        if (itemId == R.id.action_copy_all) {
-            copyAll();
-            return true;
-        }
-        if (itemId == R.id.action_copy_line) {
-            return copyLine();
-        }
-        if (itemId == R.id.action_delete_line) {
-            return deleteLine();
-        }
-        if (itemId == R.id.action_paste) {
-            return paste();
-        }
-        if (itemId == R.id.action_clear) {
-            return tryDoing(() -> mEditor.setText(""));
-        }
-        if (itemId == R.id.action_comment) {
-            return tryDoing(mEditor.commentHelper::handle);
-        }
-        if (itemId == R.id.action_beautify) {
-            return tryDoing(mEditorView::beautifyCode);
-        }
-        return false;
     }
 
     private void jumpToLine() {

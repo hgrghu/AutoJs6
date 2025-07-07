@@ -80,6 +80,9 @@ import java.io.File
 import java.io.IOException
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
+import org.autojs.autojs.agent.ui.AgentPanel
+import org.autojs.autojs.agent.ui.ChatInterface
+import android.widget.FrameLayout
 
 /**
  * Created by Stardust on Sep 28, 2017.
@@ -127,6 +130,12 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
     private val mDocsWebView: EWebView = binding.docs
     private val mDrawerLayout: DrawerLayout = binding.drawerLayout
 
+    // Agent Panel 相关属性
+    private val mAgentPanelContainer: FrameLayout = binding.agentPanelContainer
+    private var mAgentPanel: AgentPanel? = null
+    private var mChatInterface: ChatInterface? = null
+    private var mIsAgentPanelVisible = false
+
     private var mCurrentCharsetConfidence: Int = 0
     private var mCurrentCharset: Charset = DEFAULT_CHARSET_TO_WRITE_FILE
     private var mHadBom = false
@@ -168,6 +177,7 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
         setUpEditor()
         setUpInputMethodEnhancedBar()
         setUpFunctionsKeyboard()
+        setUpAgentPanel()
         setMenuItemStatus(R.id.save, false)
         mDocsWebView.apply {
             webView.settings.displayZoomControls = true
@@ -177,6 +187,117 @@ class EditorView : LinearLayout, OnHintClickListener, ClickCallback, ToolbarFrag
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe { theme: Theme? -> setTheme(theme) }
         initNormalToolbar()
+    }
+
+    /**
+     * 设置Agent面板
+     */
+    private fun setUpAgentPanel() {
+        mAgentPanel = AgentPanel(context).apply {
+            setAgentPanelListener(object : AgentPanel.AgentPanelListener {
+                override fun onScriptOptimized(optimizedScript: String) {
+                    // 将优化后的脚本替换到编辑器
+                    editor.text = optimizedScript
+                    showSnack(this@EditorView, "脚本已优化", Snackbar.LENGTH_SHORT)
+                }
+
+                override fun onScriptGenerated(script: String, explanation: String) {
+                    // 将生成的脚本插入到编辑器
+                    if (editor.text.isBlank()) {
+                        editor.text = script
+                    } else {
+                        editor.insertAtEnd("\n\n// $explanation\n$script")
+                    }
+                    showSnack(this@EditorView, "脚本已生成", Snackbar.LENGTH_SHORT)
+                }
+
+                override fun onShowChatInterface() {
+                    showChatInterface()
+                }
+
+                override fun onShowTemplateLibrary() {
+                    showTemplateLibrary()
+                }
+
+                override fun onShowSettings() {
+                    showAgentSettings()
+                }
+            })
+        }
+        
+        // 将Agent面板添加到容器中
+        mAgentPanelContainer.addView(mAgentPanel)
+    }
+
+    /**
+     * 显示/隐藏Agent面板
+     */
+    fun toggleAgentPanel() {
+        if (mIsAgentPanelVisible) {
+            hideAgentPanel()
+        } else {
+            showAgentPanel()
+        }
+    }
+
+    /**
+     * 显示Agent面板
+     */
+    fun showAgentPanel() {
+        mAgentPanelContainer.visibility = View.VISIBLE
+        mIsAgentPanelVisible = true
+        
+        // 更新当前脚本到Agent面板
+        mAgentPanel?.setCurrentScript(editor.text)
+    }
+
+    /**
+     * 隐藏Agent面板
+     */
+    fun hideAgentPanel() {
+        mAgentPanelContainer.visibility = View.GONE
+        mIsAgentPanelVisible = false
+    }
+
+    /**
+     * 显示聊天界面
+     */
+    private fun showChatInterface() {
+        if (mChatInterface == null) {
+            mChatInterface = ChatInterface(context)
+        }
+        mChatInterface?.show()
+    }
+
+    /**
+     * 显示模板库
+     */
+    private fun showTemplateLibrary() {
+        // 这里可以创建一个模板库对话框或Activity
+        MaterialDialog.Builder(context)
+            .title("脚本模板库")
+            .content("模板库功能开发中...")
+            .positiveText("确定")
+            .show()
+    }
+
+    /**
+     * 显示Agent设置
+     */
+    private fun showAgentSettings() {
+        // 这里可以创建一个设置对话框或Activity
+        MaterialDialog.Builder(context)
+            .title("AI Agent 设置")
+            .content("设置功能开发中...")
+            .positiveText("确定")
+            .show()
+    }
+
+    /**
+     * 获取Agent面板是否可见
+     */
+    fun isAgentPanelVisible(): Boolean {
+        return mIsAgentPanelVisible
     }
 
     @SuppressLint("UnspecifiedRegisterReceiverFlag")

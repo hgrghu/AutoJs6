@@ -8,6 +8,45 @@
         android:title="@string/text_force_stop"
         app:showAsAction="never" />
 
+    <!-- AI Agent 菜单项 -->
+    <item android:title="AI Agent">
+
+        <menu>
+
+            <item
+                android:id="@+id/action_toggle_agent_panel"
+                android:title="显示/隐藏 Agent 面板"
+                app:showAsAction="never" />
+
+            <item
+                android:id="@+id/action_ai_chat"
+                android:title="AI 聊天"
+                app:showAsAction="never" />
+
+            <item
+                android:id="@+id/action_optimize_script"
+                android:title="AI 优化脚本"
+                app:showAsAction="never" />
+
+            <item
+                android:id="@+id/action_generate_script"
+                android:title="AI 生成脚本"
+                app:showAsAction="never" />
+
+            <item
+                android:id="@+id/action_script_templates"
+                android:title="脚本模板库"
+                app:showAsAction="never" />
+
+            <item
+                android:id="@+id/action_agent_settings"
+                android:title="Agent 设置"
+                app:showAsAction="never" />
+
+        </menu>
+
+    </item>
+
     <item android:title="@string/text_edit">
 
         <menu>

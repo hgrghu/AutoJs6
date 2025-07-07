@@ -39,6 +39,11 @@
                 app:showAsAction="never" />
 
             <item
+                android:id="@+id/action_model_management"
+                android:title="模型管理"
+                app:showAsAction="never" />
+
+            <item
                 android:id="@+id/action_agent_settings"
                 android:title="Agent 设置"
                 app:showAsAction="never" />

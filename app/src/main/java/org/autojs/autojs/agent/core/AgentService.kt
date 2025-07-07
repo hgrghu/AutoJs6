@@ -36,6 +36,10 @@ class AgentService private constructor(
     private val templateManager = TemplateManager(context)
     private val cacheManager = CacheManager(context)
     
+    // 新增组件
+    private val modelManager = ModelManager.getInstance(context)
+    private val githubManager = GitHubManager.getInstance(context)
+    
     // 配置和状态
     private val agentConfig = AgentConfig(context)
     private val contextManager = ContextManager()
@@ -79,20 +83,31 @@ class AgentService private constructor(
      */
     private fun initializeAIClient() {
         val config = agentConfig.getAIConfig()
-        agentAPI = when (config.modelType) {
-            AgentConfig.ModelType.CHATGPT -> {
-                ChatGPTClient(
-                    apiKey = config.apiKey,
-                    baseUrl = config.baseUrl ?: "https://api.openai.com/v1",
-                    model = config.model ?: "gpt-4"
-                )
+        val selectedModelId = config.selectedModelId
+        val apiKey = config.apiKey
+        
+        if (selectedModelId.isNotEmpty() && apiKey.isNotEmpty()) {
+            val model = modelManager.getModelById(selectedModelId)
+            if (model != null) {
+                agentAPI = modelManager.createClientForModel(model, apiKey)
             }
-            AgentConfig.ModelType.LOCAL -> {
-                LocalLLMClient(config.localModelPath ?: "")
-            }
-            AgentConfig.ModelType.CUSTOM -> {
-                // 支持自定义模型接口
-                null
+        } else {
+            // 回退到旧的配置方式
+            agentAPI = when (config.modelType) {
+                AgentConfig.ModelType.CHATGPT -> {
+                    ChatGPTClient(
+                        apiKey = config.apiKey,
+                        baseUrl = config.baseUrl ?: "https://api.openai.com/v1",
+                        model = config.model ?: "gpt-4"
+                    )
+                }
+                AgentConfig.ModelType.LOCAL -> {
+                    LocalLLMClient(config.localModelPath ?: "")
+                }
+                AgentConfig.ModelType.CUSTOM -> {
+                    // 支持自定义模型接口
+                    null
+                }
             }
         }
     }
@@ -323,6 +338,105 @@ class AgentService private constructor(
      */
     fun getConfig(): AgentConfig.AIConfig {
         return agentConfig.getAIConfig()
+    }
+    
+    /**
+     * 获取模型管理器
+     */
+    fun getModelManager(): ModelManager {
+        return modelManager
+    }
+    
+    /**
+     * 获取GitHub管理器
+     */
+    fun getGitHubManager(): GitHubManager {
+        return githubManager
+    }
+    
+    /**
+     * 切换使用的AI模型
+     */
+    suspend fun switchModel(modelId: String, apiKey: String): Boolean {
+        return try {
+            val model = modelManager.getModelById(modelId)
+            if (model != null) {
+                // 测试模型连接
+                val testResult = modelManager.testModelConnection(model, apiKey)
+                if (testResult.success) {
+                    // 更新配置
+                    agentConfig.updateAIConfig(
+                        agentConfig.getAIConfig().copy(
+                            selectedModelId = modelId,
+                            apiKey = apiKey
+                        )
+                    )
+                    // 重新初始化客户端
+                    initializeAIClient()
+                    true
+                } else {
+                    false
+                }
+            } else {
+                false
+            }
+        } catch (e: Exception) {
+            false
+        }
+    }
+    
+    /**
+     * 自动同步优化结果到GitHub
+     */
+    suspend fun autoSyncOptimizationResult(
+        scriptName: String,
+        originalScript: String,
+        optimizationResult: OptimizationResult
+    ) {
+        if (githubManager.isAutoSyncEnabled() && optimizationResult.isSuccessful) {
+            try {
+                githubManager.autoSyncIfEnabled(
+                    scriptName = scriptName,
+                    optimizedContent = optimizationResult.optimizedScript,
+                    originalScore = 60, // 默认原始分数
+                    newScore = optimizationResult.score
+                )
+            } catch (e: Exception) {
+                // 静默处理错误，不影响主要功能
+            }
+        }
+    }
+    
+    /**
+     * 手动推送脚本到GitHub
+     */
+    suspend fun pushScriptToGitHub(
+        scriptName: String,
+        scriptContent: String,
+        commitMessage: String? = null
+    ): Boolean {
+        return try {
+            val result = githubManager.pushScript(
+                scriptName = scriptName,
+                scriptContent = scriptContent,
+                commitMessage = commitMessage ?: "Update script via AutoJs6 Agent"
+            )
+            result.success
+        } catch (e: Exception) {
+            false
+        }
+    }
+    
+    /**
+     * 从GitHub拉取脚本
+     */
+    suspend fun pullScriptFromGitHub(filePath: String): String? {
+        return try {
+            val result = githubManager.pullScript(filePath)
+            if (result.success) result.content else null
+        } catch (e: Exception) {
+            null
+        }
     }
     
     /**

@@ -188,6 +188,7 @@ class AgentConfig(private val context: Context) {
         val baseUrl: String? = null,
         val model: String? = null,
         val localModelPath: String? = null,
+        val selectedModelId: String = "", // 新增：选中的模型ID
         val maxTokens: Int = 2000,
         val temperature: Float = 0.3f,
         val timeout: Long = 30000,
@@ -202,6 +203,7 @@ class AgentConfig(private val context: Context) {
                 put("baseUrl", baseUrl)
                 put("model", model)
                 put("localModelPath", localModelPath)
+                put("selectedModelId", selectedModelId)
                 put("maxTokens", maxTokens)
                 put("temperature", temperature.toDouble())
                 put("timeout", timeout)
@@ -220,6 +222,7 @@ class AgentConfig(private val context: Context) {
                     baseUrl = obj.optString("baseUrl", null),
                     model = obj.optString("model", null),
                     localModelPath = obj.optString("localModelPath", null),
+                    selectedModelId = obj.optString("selectedModelId", ""),
                     maxTokens = obj.optInt("maxTokens", 2000),
                     temperature = obj.optDouble("temperature", 0.3).toFloat(),
                     timeout = obj.optLong("timeout", 30000),

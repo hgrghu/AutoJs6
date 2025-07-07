@@ -106,6 +106,11 @@ public class EditorMenu {
             return true;
         }
         
+        if (itemId == R.id.action_model_management) {
+            showModelManagement();
+            return true;
+        }
+        
         if (itemId == R.id.action_agent_settings) {
             showAgentSettings();
             return true;
@@ -274,6 +279,16 @@ public class EditorMenu {
             .content("模板库功能开发中，敬请期待...")
             .positiveText("确定")
             .show();
+    }
+
+    private void showModelManagement() {
+        try {
+            android.content.Intent intent = new android.content.Intent(mContext, 
+                org.autojs.autojs.agent.ui.ModelManagementActivity.class);
+            mContext.startActivity(intent);
+        } catch (Exception e) {
+            ViewUtils.showToast(mContext, "打开模型管理失败: " + e.getMessage());
+        }
     }
 
     private void showAgentSettings() {

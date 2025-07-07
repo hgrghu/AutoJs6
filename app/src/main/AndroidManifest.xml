@@ -290,6 +290,12 @@
             android:name="org.autojs.autojs.ui.settings.DeveloperOptionsActivity"
             android:theme="@style/AppTheme.Settings" />
 
+        <!-- AI Agent Model Management Activity -->
+        <activity
+            android:name="org.autojs.autojs.agent.ui.ModelManagementActivity"
+            android:theme="@style/AppTheme.Settings"
+            android:label="AI模型管理" />
+
         <!-- <activity android:name="org.autojs.autojs.ui.error.ErrorReportActivity" android:process=":crash_report"/> -->
         <activity android:name="org.autojs.autojs.ui.error.ErrorReportActivity" />
 
